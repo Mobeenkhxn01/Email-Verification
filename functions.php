@@ -5,6 +5,9 @@ use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -13,7 +16,6 @@ function generateVerificationCode(): string
 {
     return str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 }
-
 
 function registerEmail($email): bool
 {
@@ -39,10 +41,9 @@ function unsubscribeEmail($email): bool
     return true;
 }
 
-
 function sendVerificationEmail($email, $code, $type = 'subscribe'): bool
 {
-     $subject = $type === 'unsubscribe' ? 'Confirm Un-subscription' : 'Your Verification Code';
+    $subject = $type === 'unsubscribe' ? 'Confirm Un-subscription' : 'Your Verification Code';
     $body = $type === 'unsubscribe' ? <<<HTML
 <div style="font-family: ui-sans-serif, system-ui, sans-serif; background-color: #ffffff; padding: 1.5rem; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); max-width: 500px; margin: auto;">
     <h2 style="color: #dc2626; font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem;">Unsubscribe Confirmation</h2>
@@ -69,35 +70,22 @@ HTML
 </div>
 HTML;
 
-/*
-     If I have to write it without PHPMailer and with the help of mail() function then I will write like this
-     but for which I have to save external server for SMTP which is against the guidance from readme file
-     So, I use PHPMailer. Similar, go with the unsubscribe function
-
-
-    $headers = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-type: text/html; charset=UTF-8\r\n";
-    $headers .= "From: no-reply@example.com\r\n";
-
-    return mail($email, $subject, $body, $headers);
-     */
-
     $mail = new PHPMailer(true);
 
     try {
         $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = 'mobeenkhan191915@gmail.com';
-        $mail->Password = 'hjppokbzwfajrgyc';
+        $mail->Host       = $_ENV['SMTP_HOST'];
+        $mail->SMTPAuth   = true;
+        $mail->Username   = $_ENV['SMTP_USERNAME'];
+        $mail->Password   = $_ENV['SMTP_PASSWORD'];
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
+        $mail->Port       = $_ENV['SMTP_PORT'];
 
-        $mail->setFrom('no-reply@example.com', 'XKCD Subscription');
+        $mail->setFrom($_ENV['SMTP_FROM'], $_ENV['SMTP_FROM_NAME']);
         $mail->addAddress($email);
         $mail->isHTML(true);
         $mail->Subject = $subject;
-        $mail->Body = $body;
+        $mail->Body    = $body;
 
         $mail->send();
 
@@ -109,7 +97,6 @@ HTML;
         return false;
     }
 }
-
 
 function verifyCode($email, $code, $type = 'subscribe'): bool
 {
@@ -159,18 +146,18 @@ function sendXKCDUpdatesToSubscribers(): void
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'mobeenkhan191915@gmail.com';
-            $mail->Password = 'hjppokbzwfajrgyc';
+            $mail->Host       = $_ENV['SMTP_HOST'];
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $_ENV['SMTP_USERNAME'];
+            $mail->Password   = $_ENV['SMTP_PASSWORD'];
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port = 587;
+            $mail->Port       = $_ENV['SMTP_PORT'];
 
-            $mail->setFrom('no-reply@example.com', 'XKCD Subscription');
+            $mail->setFrom($_ENV['SMTP_FROM'], $_ENV['SMTP_FROM_NAME']);
             $mail->addAddress($email);
             $mail->isHTML(true);
             $mail->Subject = 'Your XKCD Comic';
-            $mail->Body = $body;
+            $mail->Body    = $body;
 
             $mail->send();
         } catch (Exception $e) {
