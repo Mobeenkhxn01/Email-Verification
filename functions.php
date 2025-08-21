@@ -5,8 +5,11 @@ use PHPMailer\PHPMailer\Exception;
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
-$dotenv->load();
+if (file_exists(__DIR__ . '/.env')) {
+    // Local development
+    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+    $dotenv->load();
+}
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -74,14 +77,15 @@ HTML;
 
     try {
         $mail->isSMTP();
-        $mail->Host       = $_ENV['SMTP_HOST'];
+        $mail->Host       = getenv('SMTP_HOST');
         $mail->SMTPAuth   = true;
-        $mail->Username   = $_ENV['SMTP_USERNAME'];
-        $mail->Password   = $_ENV['SMTP_PASSWORD'];
+        $mail->Username   = getenv('SMTP_USERNAME');
+        $mail->Password   = getenv('SMTP_PASSWORD');
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = $_ENV['SMTP_PORT'];
+        $mail->Port       = getenv('SMTP_PORT');
 
-        $mail->setFrom($_ENV['SMTP_FROM'], $_ENV['SMTP_FROM_NAME']);
+        $mail->setFrom(getenv('SMTP_FROM'), getenv('SMTP_FROM_NAME'));
+
         $mail->addAddress($email);
         $mail->isHTML(true);
         $mail->Subject = $subject;
@@ -123,7 +127,7 @@ function fetchAndFormatXKCDData(): string
       <h2 style="color: #333;">XKCD Comic</h2>
       <img src="{$img}" alt="{$title}" style="max-width: 100%; border-radius: 10px;">
       <p style="margin-top: 20px;">
-        <a href="https://email-verification-fkfa.onrender.com/unsubscribe.php" style="padding: 12px 20px; background-color: #ff4b5c; color: white; text-decoration: none; border-radius: 5px;">
+        <a href="http://localhost:8000/unsubscribe.php" style="padding: 12px 20px; background-color: #ff4b5c; color: white; text-decoration: none; border-radius: 5px;">
           Unsubscribe
         </a>
       </p>
@@ -146,14 +150,15 @@ function sendXKCDUpdatesToSubscribers(): void
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host       = $_ENV['SMTP_HOST'];
+            $mail->Host       = getenv('SMTP_HOST');
             $mail->SMTPAuth   = true;
-            $mail->Username   = $_ENV['SMTP_USERNAME'];
-            $mail->Password   = $_ENV['SMTP_PASSWORD'];
+            $mail->Username   = getenv('SMTP_USERNAME');
+            $mail->Password   = getenv('SMTP_PASSWORD');
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = $_ENV['SMTP_PORT'];
+            $mail->Port       = getenv('SMTP_PORT');
 
-            $mail->setFrom($_ENV['SMTP_FROM'], $_ENV['SMTP_FROM_NAME']);
+            $mail->setFrom(getenv('SMTP_FROM'), getenv('SMTP_FROM_NAME'));
+
             $mail->addAddress($email);
             $mail->isHTML(true);
             $mail->Subject = 'Your XKCD Comic';
