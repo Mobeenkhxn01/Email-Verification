@@ -127,7 +127,7 @@ function fetchAndFormatXKCDData(): string
       <h2 style="color: #333;">XKCD Comic</h2>
       <img src="{$img}" alt="{$title}" style="max-width: 100%; border-radius: 10px;">
       <p style="margin-top: 20px;">
-        <a href="http://localhost:8000/unsubscribe.php" style="padding: 12px 20px; background-color: #ff4b5c; color: white; text-decoration: none; border-radius: 5px;">
+        <a href="https://email-verification-fkfa.onrender.com/unsubscribe.php" style="padding: 12px 20px; background-color: #ff4b5c; color: white; text-decoration: none; border-radius: 5px;">
           Unsubscribe
         </a>
       </p>

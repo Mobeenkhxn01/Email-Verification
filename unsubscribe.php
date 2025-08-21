@@ -4,12 +4,14 @@ require_once 'functions.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+
 $email = $_POST['unsubscribe_email'] ?? ($_GET['email'] ?? '');
 $verification_code = $_POST['verification_code'] ?? '';
 
 $message = $_SESSION['message'] ?? '';
 $alertClass = 'hidden';
 unset($_SESSION['message']);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['unsubscribe_email']) && !isset($_POST['verification_code'])) {
         $code = generateVerificationCode();
@@ -20,28 +22,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header("Location: {$_SERVER['PHP_SELF']}?email=" . urlencode($email));
             exit;
         } else {
-            $message = "Failed to send verification code. Please try again.";
-            $alertClass = 'text-red-600';
+            $message = "❌ Failed to send verification code. Please try again.";
+            $alertClass = 'bg-red-50 text-red-700 border border-red-200';
         }
     }
-   if (!empty($verification_code) && !empty($email)) {
+
+    if (!empty($verification_code) && !empty($email)) {
         $session_key = "verification_code_unsubscribe_$email";
         if (isset($_SESSION[$session_key]) && $_SESSION[$session_key] === $verification_code) {
             if (unsubscribeEmail($email)) {
                 unset($_SESSION[$session_key]);
-                $message = "Email $email has been unsubscribed.";
-                $alertClass = 'text-green-600';
+                $message = "✅ Email $email has been unsubscribed.";
+                $alertClass = 'bg-green-50 text-green-700 border border-green-200';
             } else {
-                $message = "Email not found or already unsubscribed.";
-                $alertClass = 'text-red-600';
+                $message = "❌ Email not found or already unsubscribed.";
+                $alertClass = 'bg-red-50 text-red-700 border border-red-200';
             }
         } else {
-            $message = "Invalid verification code.";
-            $alertClass = 'text-red-600';
+            $message = "❌ Invalid verification code.";
+            $alertClass = 'bg-red-50 text-red-700 border border-red-200';
         }
     }
-      if (!empty($message) && $alertClass === 'hidden') {
-        $alertClass = 'text-green-600';
+
+    if (!empty($message) && $alertClass === 'hidden') {
+        $alertClass = 'bg-green-50 text-green-700 border border-green-200';
     }
 }
 ?>
@@ -53,55 +57,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
-    <div class="flex flex-col items-center gap-8 w-full max-w-xl mx-auto">
-        <!-- Email input form -->
-        <form method="POST" class="w-full bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold mb-4 text-center text-red-600">Unsubscribe from XKCD Emails</h2>
-            <div class="flex flex-col gap-4">
-                <div>
-                    <label for="unsubscribe_email" class="block mb-2 text-sm font-medium text-gray-900">Email</label>
-                    <input 
-                        type="email" 
-                        name="unsubscribe_email" 
-                        value="<?= htmlspecialchars($email) ?>" 
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5" 
-                        placeholder="Enter your email to unsubscribe" 
-                        required 
-                    />
+<body class="bg-gradient-to-br from-red-50 via-white to-pink-50 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl mx-auto">
+        <div class="bg-white shadow-2xl rounded-2xl p-8 border border-gray-100">
+            <h1 class="text-3xl font-bold text-center text-red-600 mb-2">📮 Unsubscribe</h1>
+            <p class="text-center text-gray-600 mb-6">We're sad to see you go. Enter your email below to unsubscribe.</p>
+            
+            <!-- Email Input Form -->
+            <form method="POST" class="mb-6">
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Email Address</label>
+                        <input 
+                            type="email" 
+                            name="unsubscribe_email" 
+                            value="<?= htmlspecialchars($email) ?>" 
+                            class="w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 shadow-sm p-3" 
+                            placeholder="your@email.com" 
+                            required
+                        />
+                    </div>
+                    <button 
+                        type="submit" 
+                        class="w-full text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-xl text-base px-5 py-3 transition-all duration-200"
+                    >
+                        Send Verification Code
+                    </button>
                 </div>
-                <button 
-                    type="submit" 
-                    class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5"
-                >
-                    Unsubscribe
-                </button>
-            </div>
-        </form>
-       <form method="POST" class="w-full bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold mb-4 text-center text-red-600">Enter Verification Code</h2>
-            <input type="hidden" name="unsubscribe_email" value="<?= htmlspecialchars($email) ?>">
-            <div class="flex flex-col gap-4">
-                <div>
-                    <label for="verification_code" class="block mb-2 text-sm font-medium text-gray-900">Verification Code</label>
-                    <input 
-                        type="text" 
-                        name="verification_code" 
-                        maxlength="6" 
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5" 
-                        placeholder="Enter 6-digit code" 
-                        required 
-                    />
+            </form>
+
+            <!-- Verification Form -->
+            <form method="POST">
+                <input type="hidden" name="unsubscribe_email" value="<?= htmlspecialchars($email) ?>">
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Verification Code</label>
+                        <input 
+                            type="text" 
+                            name="verification_code" 
+                            maxlength="6" 
+                            class="w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-red-500 shadow-sm p-3 tracking-widest text-center font-mono text-lg" 
+                            placeholder="123456" 
+                        />
+                    </div>
+                    <button 
+                        type="submit" 
+                        class="w-full text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-300 font-medium rounded-xl text-base px-5 py-3 transition-all duration-200"
+                    >
+                        Confirm Unsubscribe
+                    </button>
                 </div>
-                <button 
-                    type="submit" 
-                    class="text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5"
-                >
-                    Verify
-                </button>
-            </div>
-        </form>
-      <p class="font-medium <?= $alertClass ?>"><?= htmlspecialchars($message) ?></p>
+            </form>
+
+            <!-- Message Alert -->
+            <?php if (!empty($message)): ?>
+                <div class="mt-6 p-4 rounded-xl text-center font-medium <?= $alertClass ?>">
+                    <?= htmlspecialchars($message) ?>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </body>
 </html>

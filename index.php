@@ -38,8 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>XKCD Email Subscription</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -52,62 +53,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         };
     </script>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
-    <div class="flex flex-col items-center gap-8 w-full max-w-xl mx-auto">
-        <form method="POST" class="w-full bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold mb-4 text-center text-red-600">XKCD Email Subscription</h2>
-            <div class="flex flex-col gap-4">
-                <div>
-                    <label for="email" class="block mb-2 text-sm font-medium text-gray-900">Email</label>
-                    <input 
-                        type="email" 
-                        name="email" 
-                        value="<?= htmlspecialchars($email) ?>" 
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" 
-                        placeholder="Enter your email" 
-                        required 
-                    />
+<body class="bg-gradient-to-br from-blue-50 via-white to-indigo-50 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl mx-auto">
+        <div class="bg-white shadow-2xl rounded-2xl p-8 border border-gray-100">
+            <h1 class="text-3xl font-bold text-center text-indigo-700 mb-2">📩 XKCD Subscription</h1>
+            <p class="text-center text-gray-600 mb-6">Stay updated with the latest XKCD comics. Subscribe now!</p>
+            
+            <!-- Email Form -->
+            <form method="POST" class="mb-6">
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Email Address</label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            value="<?= htmlspecialchars($email) ?>" 
+                            class="w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm p-3" 
+                            placeholder="your@email.com" 
+                            required
+                        />
+                    </div>
+                    <button 
+                        type="submit" 
+                        class="w-full text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 font-medium rounded-xl text-base px-5 py-3 transition-all duration-200"
+                    >
+                        Get Verification Code
+                    </button>
                 </div>
-                <button 
-                    type="submit" 
-                    id="submit-email" 
-                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
-                >
-                    Get OTP
-                </button>
-            </div>
-        </form>
+            </form>
 
-        <form method="POST" class="w-full bg-white shadow-md rounded-lg p-6">
-            <h2 class="text-xl font-semibold mb-4 text-center">Verify Subscription</h2>
-            <input type="hidden" name="email" value="<?= htmlspecialchars($email) ?>">
-            <div class="flex flex-col gap-4">
-                <div>
-                    <label for="verification_code" class="block mb-2 text-sm font-medium text-gray-900">Verification Code</label>
-                    <input 
-                        type="text" 
-                        name="verification_code" 
-                        maxlength="6" 
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" 
-                        placeholder="Enter 6-digit code"
-                        required 
-                    />
+            <!-- Verification Form -->
+            <form method="POST" class="mb-6">
+                <input type="hidden" name="email" value="<?= htmlspecialchars($email) ?>">
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <label class="block mb-2 text-sm font-medium text-gray-900">Verification Code</label>
+                        <input 
+                            type="text" 
+                            name="verification_code" 
+                            maxlength="6" 
+                            class="w-full rounded-xl border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm p-3 tracking-widest text-center font-mono text-lg" 
+                            placeholder="123456"
+                        />
+                    </div>
+                    <button 
+                        type="submit" 
+                        class="w-full text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-xl text-base px-5 py-3 transition-all duration-200"
+                    >
+                        Verify Subscription
+                    </button>
                 </div>
-                <button 
-                    type="submit" 
-                    id="submit-verification" 
-                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
-                >
-                    Verify
-                </button>
-            </div>
-        </form>
+            </form>
 
-        <?php if (!empty($message)): ?>
-            <p class="text-center font-medium <?= str_starts_with($message, '✅') ? 'text-green-600' : 'text-red-600' ?>">
-                <?= htmlspecialchars($message) ?>
-            </p>
-        <?php endif; ?>
+            <!-- Message -->
+            <?php if (!empty($message)): ?>
+                <div class="text-center font-medium mt-4 p-3 rounded-lg 
+                    <?= str_starts_with($message, '✅') 
+                        ? 'bg-green-50 text-green-700 border border-green-200' 
+                        : 'bg-red-50 text-red-700 border border-red-200' ?>">
+                    <?= htmlspecialchars($message) ?>
+                </div>
+            <?php endif; ?>
+        </div>
     </div>
 </body>
 </html>
