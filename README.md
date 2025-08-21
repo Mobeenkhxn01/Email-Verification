@@ -38,6 +38,7 @@ src/
 ├── cron.php                 # CRON job script for sending XKCD comics
 ├── setup_cron.sh           # Automated CRON job setup script
 ├── registered_emails.txt    # Stores verified subscriber emails (database-free)
+├── Dockerfile              # Docker containerization for Render deployment
 ├── composer.json           # PHPMailer dependencies configuration
 ├── composer.lock           # Locked dependency versions  
 └── vendor/                 # PHPMailer and Composer dependencies
@@ -124,6 +125,120 @@ crontab -e
 0 9 * * * /usr/bin/php /path/to/project/src/cron.php >> /path/to/project/cron.log 2>&1
 ```
 
+## 🌍 Deployment Options
+
+This project can be deployed on:
+
+- **Render / Vercel** (PHP Runtime)
+- **cPanel Hosting** 
+- **VPS / Bare-metal server** with Apache/Nginx + PHP
+- **Shared hosting** with PHP support
+
+### 🚀 Render.com Deployment (Recommended)
+
+#### Step 1: Prepare for Deployment
+1. Push your code to GitHub/GitLab repository
+2. Ensure `Dockerfile` is in the root directory
+
+#### Step 2: Create Web Service on Render
+1. Go to [Render Dashboard](https://dashboard.render.com)
+2. Click **"New"** → **"Web Service"**
+3. Connect your GitHub/GitLab repository
+4. Configure deployment settings:
+   - **Name**: `xkcd-subscription`
+   - **Environment**: `Docker`
+   - **Region**: Select closest to your users
+   - **Branch**: `main` (or your default branch)
+
+#### Step 3: Set Environment Variables
+In Render dashboard, add these environment variables:
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+SMTP_FROM=your-email@gmail.com
+SMTP_FROM_NAME=XKCD Comics
+```
+
+#### Step 4: Deploy
+1. Click **"Create Web Service"**
+2. Wait for deployment to complete (5-10 minutes)
+3. Your app will be live at `https://your-app-name.onrender.com`
+
+### ⏰ CRON Job Setup for Render
+
+#### Option 1: Render Cron Jobs (Recommended for Render)
+1. **Create Cron Job Service**:
+   - Go to Render Dashboard → **"New"** → **"Cron Job"**
+   - Connect same repository
+   - Configure settings:
+     - **Name**: `xkcd-daily-cron`
+     - **Environment**: `Docker`
+     - **Command**: `php /var/www/html/cron.php`
+     - **Schedule**: `0 9 * * *` (daily at 9 AM UTC)
+
+2. **Add Environment Variables**: Copy all SMTP variables from your web service
+
+#### Option 2: External Cron Services
+Use third-party cron services:
+- **EasyCron**: https://www.easycron.com
+- **cron-job.org**: https://cron-job.org  
+- **UptimeRobot**: Monitor + webhook functionality
+
+**Setup**: Create HTTP GET request to `https://your-app.onrender.com/cron.php` with daily schedule
+
+#### Option 3: Local Server CRON (For VPS/Dedicated Servers)
+Use the included `setup_cron.sh` script:
+```bash
+chmod +x setup_cron.sh
+./setup_cron.sh
+```
+
+### 🔍 CRON Monitoring & Status Check
+
+#### For Render Cron Jobs:
+1. **Dashboard Monitoring**:
+   - Go to Render Dashboard → Your Cron Job Service
+   - Check **"Events"** tab for execution history
+   - View **"Logs"** tab for detailed output
+
+2. **Manual Trigger** (Testing):
+   ```bash
+   # Access your web service via browser/curl
+   https://your-app.onrender.com/cron.php
+   ```
+
+#### For External Cron Services:
+- Check respective service dashboard for execution logs
+- Most services provide email alerts for failed executions
+
+#### For Local CRON:
+```bash
+# Check installed cron jobs
+crontab -l
+
+# View cron execution logs  
+tail -f ~/xkcd_cron.log
+
+# Test cron script manually
+php cron.php
+
+# Check cron service status
+sudo systemctl status cron
+```
+
+### Deployment Checklist
+
+- [ ] Place project files in your web directory (e.g., `/var/www/html/`)
+- [ ] Configure `.env` with your SMTP credentials  
+- [ ] Set proper file permissions for `registered_emails.txt`
+- [ ] Set up CRON job to run `cron.php` every 24 hours
+- [ ] Test email sending functionality
+- [ ] Verify XKCD API access
+- [ ] **For Render**: Verify both web service and cron job are running
+- [ ] **For Render**: Check environment variables are properly set
+
 ## 📩 Email Formats
 
 ### Verification Email
@@ -148,24 +263,6 @@ crontab -e
 ```html
 <p>To confirm un-subscription, use this code: <strong>654321</strong></p>
 ```
-
-## 🌍 Deployment Options
-
-This project can be deployed on:
-
-- **Render / Vercel** (PHP Runtime)
-- **cPanel Hosting** 
-- **VPS / Bare-metal server** with Apache/Nginx + PHP
-- **Shared hosting** with PHP support
-
-### Deployment Checklist
-
-- [ ] Place project files in your web directory (e.g., `/var/www/html/`)
-- [ ] Configure `.env` with your SMTP credentials  
-- [ ] Set proper file permissions for `registered_emails.txt`
-- [ ] Set up CRON job to run `cron.php` every 5 minutes
-- [ ] Test email sending functionality
-- [ ] Verify XKCD API access
 
 ## 🔧 Configuration Options
 
@@ -201,6 +298,7 @@ The system uses PHPMailer with SMTP authentication. Popular providers:
 - **XKCD API** - Comic data source (https://xkcd.com/[randomComicID]/info.0.json)  
 - **CRON** - Automated task scheduling (24-hour intervals)
 - **Composer** - Dependency management
+- **Docker** - Containerization for Render deployment
 
 ## 🔍 Troubleshooting
 
@@ -226,6 +324,14 @@ The system uses PHPMailer with SMTP authentication. Popular providers:
 - Ensure PHP path is correct (`which php`)
 - Check system cron service is running
 - Verify file permissions for `cron.php`
+- **For Render**: Check cron job service logs in dashboard
+- **For External Services**: Verify webhook URL is accessible
+
+**Render-specific issues:**
+- Check environment variables are set in both web service AND cron job
+- Verify Docker build logs for any errors
+- Ensure `registered_emails.txt` has proper write permissions
+- Test manual cron execution via browser: `your-app.onrender.com/cron.php`
 
 **File permission errors:**
 - Ensure web server can write to `registered_emails.txt`
@@ -249,6 +355,8 @@ The system uses PHPMailer with SMTP authentication. Popular providers:
 *Automated CRON job configuration via setup script*
 
 > **Note:** Add your screenshots to a `screenshots/` folder in your repository and update the image paths above.
+
+## 🗓 Future Enhancements
 
 - [ ] Add database support (MySQL/PostgreSQL)
 - [ ] Implement user dashboard
@@ -274,6 +382,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Live Demo:** [https://email-verification-fkfa.onrender.com]
 - **XKCD Official:** https://xkcd.com
 - **PHPMailer Documentation:** https://github.com/PHPMailer/PHPMailer
+- **Render Documentation:** https://render.com/docs
 
 ---
 
