@@ -1,64 +1,71 @@
-📬 XKCD Email Subscription System
-A PHP-based email subscription system where users can register with their email, verify using a 6-digit OTP, and receive a random XKCD comic every 5 minutes via email. Users can also unsubscribe via email verification.
+# 📬 XKCD Email Subscription System
 
-This project uses PHPMailer for sending emails and stores registered emails in a simple text file (registered_emails.txt) (no database).
+A PHP-based email verification system where users register using their email, receive a 6-digit verification code, and subscribe to get a random XKCD comic every day. A CRON job fetches a random XKCD comic and sends it to all registered users every 24 hours.
 
-🚀 Features
-✅ Email Verification
+This project uses PHPMailer for reliable email delivery and stores registered emails in a simple text file (`registered_emails.txt`) - no database required!
 
-Users enter email → Receive 6-digit code → Enter code → Get registered.
+## 🚀 Features
 
-Verified emails are stored in registered_emails.txt.
+### ✅ Email Verification
+- Users enter email → Receive 6-digit code → Enter code → Get registered
+- Verified emails are stored in `registered_emails.txt`
 
-✅ Unsubscribe Feature
+### ✅ Unsubscribe Feature  
+- Emails contain an unsubscribe link
+- Clicking it sends a confirmation code → Users confirm unsubscription
+- Email is removed from `registered_emails.txt`
 
-Emails contain an unsubscribe link.
+### ✅ XKCD Comic Delivery (CRON)
+- A CRON job runs every 24 hours
+- Fetches a random XKCD comic from `https://xkcd.com/[randomComicID]/info.0.json`
+- Sends comic in HTML email format to all subscribers
 
-Clicking it sends a confirmation code → Users confirm unsubscription.
+### ✅ Lightweight (No Database)
+- Uses `registered_emails.txt` as storage
+- Easy to deploy anywhere (e.g., Render, cPanel, VPS)
 
-Email is removed from registered_emails.txt.
+## 📂 Project Structure
 
-✅ XKCD Comic Delivery (CRON)
-
-A CRON job runs every 5 minutes.
-
-Fetches a random XKCD comic (https://xkcd.com/info.0.json then randomizes).
-
-Sends comic in HTML email format to all subscribers.
-
-✅ Lightweight (No Database)
-
-Uses registered_emails.txt as storage.
-
-Easy to deploy anywhere (e.g., Render, cPanel, VPS).
-
-📂 Project Structure
-text
+```
 src/
-│── index.php          # Main subscription page (email + verification)
-│── verify.php         # OTP verification handling
-│── unsubscribe.php    # Unsubscribe flow
-│── confirm_unsubscribe.php # Unsubscribe confirmation
-│── functions.php      # Core business logic (verification, emails, XKCD fetch)
-│── cron.php          # Script executed by CRON job
-│── registered_emails.txt # Stores verified subscriber emails
-│── vendor/           # PHPMailer + dependencies (via Composer)
-⚙️ Setup Instructions
-1️⃣ Clone Repository
-bash
+├── index.php                 # Main subscription page with email verification forms
+├── unsubscribe.php          # Unsubscribe functionality with code verification
+├── functions.php            # Core business logic (all required functions)
+├── cron.php                 # CRON job script for sending XKCD comics
+├── setup_cron.sh           # Automated CRON job setup script
+├── registered_emails.txt    # Stores verified subscriber emails (database-free)
+├── composer.json           # PHPMailer dependencies configuration
+├── composer.lock           # Locked dependency versions  
+└── vendor/                 # PHPMailer and Composer dependencies
+```
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Clone Repository
+
+```bash
 git clone <your-repository-url>
 cd xkcd-email-system/src
-2️⃣ Install Dependencies
-This project uses PHPMailer. Install via Composer:
+```
 
-bash
+### 2️⃣ Install Dependencies
+
+This project uses PHPMailer for reliable email delivery. Install via Composer:
+
+```bash
 composer install
-3️⃣ Configure Environment Variables
-Create a .env file in the src/ folder.
+```
 
-Example (.env.example):
+If you don't have Composer installed, download it from [getcomposer.org](https://getcomposer.org/)
 
-bash
+**Required packages:**
+- `phpmailer/phpmailer` - SMTP email handling
+
+### 3️⃣ Configure SMTP Settings
+
+Create a `.env` file in the `src/` folder with your SMTP configuration:
+
+```env
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USERNAME=your_email@gmail.com
@@ -66,79 +73,204 @@ SMTP_PASSWORD=your_app_password
 SMTP_SECURE=tls
 FROM_EMAIL=no-reply@example.com
 FROM_NAME=XKCD Comic Bot
-⚠️ For Gmail, you must enable App Passwords (if 2FA enabled).
+```
 
-4️⃣ Running Locally
-Start PHP's built-in server:
+> ⚠️ **For Gmail users**: You must enable App Passwords (if 2FA is enabled):
+> 1. Go to Google Account Settings → Security
+> 2. Enable 2-Step Verification 
+> 3. Generate App Password for "Mail"
+> 4. Use the generated password in `SMTP_PASSWORD`
 
-bash
+### 4️⃣ Set File Permissions
+
+Ensure the web server can write to the registration file:
+
+```bash
+touch registered_emails.txt
+chmod 664 registered_emails.txt
+```
+
+### 5️⃣ Running Locally
+
+Start PHP's built-in development server:
+
+```bash
 php -S localhost:8000
-Open in browser:
-👉 http://localhost:8000
+```
 
-5️⃣ CRON Job Setup
-Add the following line to your crontab (crontab -e):
+Open in browser: **👉 https://email-verification-fkfa.onrender.com**
 
-bash
-*/5 * * * * /usr/bin/php /path/to/project/src/cron.php >> /path/to/project/cron.log 2>&1
-This will run the job every 5 minutes.
+### 6️⃣ CRON Job Setup
 
-📩 Email Formats
-Verification Email
-Subject: Your XKCD Subscription Verification Code
+Run the automated setup script to configure the CRON job:
 
-text
-Your verification code is: 123456
+```bash
+chmod +x setup_cron.sh
+./setup_cron.sh
+```
 
-Enter this code on our website to confirm your subscription.
+This will automatically add a CRON job that runs every 24 hours to send XKCD comics.
 
-Thank you!
-XKCD Comic Email
-Subject: Your Daily XKCD Comic
+**Manual CRON setup (if needed):**
+```bash
+# Edit crontab
+crontab -e
 
-text
-<h2>XKCD Comic for Today</h2>
-<h3>Title: Comic Title</h3>
+# Add this line for daily execution at 9 AM
+0 9 * * * /usr/bin/php /path/to/project/src/cron.php >> /path/to/project/cron.log 2>&1
+```
+
+## 📩 Email Formats
+
+### Verification Email
+**Subject:** Your Verification Code
+
+```html
+<p>Your verification code is: <strong>123456</strong></p>
+```
+
+### XKCD Comic Email  
+**Subject:** Your XKCD Comic
+
+```html
+<h2>XKCD Comic</h2>
 <img src="image_url_here" alt="XKCD Comic">
-<p>Alt Text: Comic alt text here</p>
-<p><a href="unsubscribe_link_here">Unsubscribe from future emails</a></p>
-Unsubscribe Confirmation Email
-Subject: Confirm Your XKCD Unsubscription
+<p><a href="#" id="unsubscribe-button">Unsubscribe</a></p>
+```
 
-text
-To confirm unsubscription, use this code: 654321
+### Unsubscribe Confirmation Email
+**Subject:** Confirm Un-subscription
 
-Visit our website and enter this code to complete the process.
+```html
+<p>To confirm un-subscription, use this code: <strong>654321</strong></p>
+```
 
-Thank you!
-🌍 Deployment
+## 🌍 Deployment Options
+
 This project can be deployed on:
 
-Render / Vercel (PHP Runtime)
+- **Render / Vercel** (PHP Runtime)
+- **cPanel Hosting** 
+- **VPS / Bare-metal server** with Apache/Nginx + PHP
+- **Shared hosting** with PHP support
 
-cPanel Hosting
+### Deployment Checklist
 
-VPS / Bare-metal server with Apache/Nginx + PHP
+- [ ] Place project files in your web directory (e.g., `/var/www/html/`)
+- [ ] Configure `.env` with your SMTP credentials  
+- [ ] Set proper file permissions for `registered_emails.txt`
+- [ ] Set up CRON job to run `cron.php` every 5 minutes
+- [ ] Test email sending functionality
+- [ ] Verify XKCD API access
 
-Make sure to:
+## 🔧 Configuration Options
 
-Place project files in your web directory (e.g., /var/www/html/)
+### Email Frequency
+To change how often comics are sent, modify the CRON schedule in `setup_cron.sh` or manually:
 
-Configure .env with your SMTP credentials
+```bash
+# Daily at 9 AM (default)
+0 9 * * * /usr/bin/php /path/to/project/src/cron.php
 
-Set up CRON job to run cron.php regularly
+# Every 12 hours
+0 */12 * * * /usr/bin/php /path/to/project/src/cron.php
 
-🛠 Built With
-PHP 7.4+
+# Weekly on Sundays at 8 AM
+0 8 * * 0 /usr/bin/php /path/to/project/src/cron.php
+```
 
-PHPMailer (Email handling)
+### SMTP Providers
+The system uses PHPMailer with SMTP authentication. Popular providers:
 
-XKCD API (https://xkcd.com/info.0.json)
+| Provider | Host | Port | Security | Notes |
+|----------|------|------|----------|-------|
+| Gmail | smtp.gmail.com | 587 | TLS | Requires App Password |
+| Outlook | smtp-mail.outlook.com | 587 | STARTTLS | Personal/Business accounts |
+| SendGrid | smtp.sendgrid.net | 587 | TLS | API key as password |
+| Mailgun | smtp.mailgun.org | 587 | TLS | Domain verification required |
+| Yahoo | smtp.mail.yahoo.com | 587 | TLS | App Password required |
 
-CRON (Automated scheduling)
+## 🛠 Built With
 
-📜 License
-MIT License © 2025
+- **PHP 8.3+** (Recommended version)
+- **PHPMailer** - Professional SMTP email handling
+- **XKCD API** - Comic data source (https://xkcd.com/[randomComicID]/info.0.json)  
+- **CRON** - Automated task scheduling (24-hour intervals)
+- **Composer** - Dependency management
 
-🔗 Live Demo
-👉 [Add your deployment link here]
+## 🔍 Troubleshooting
+
+### Common Issues
+
+**Emails not sending:**
+- Verify SMTP credentials in `.env` file
+- Check if PHPMailer is properly installed (`composer install`)
+- Test SMTP connection manually
+- Check firewall allows outbound SMTP connections (port 587/465)
+- Verify email provider settings (Gmail App Password, etc.)
+- Check `cron.log` for PHPMailer error messages
+
+**SMTP Authentication failures:**
+- Ensure App Passwords are enabled (Gmail, Yahoo)
+- Verify username/password combination
+- Check if 2FA is properly configured
+- Test with different SMTP providers
+
+**CRON job not running:**
+- Verify crontab entry with `crontab -l`
+- Check if `setup_cron.sh` executed successfully
+- Ensure PHP path is correct (`which php`)
+- Check system cron service is running
+- Verify file permissions for `cron.php`
+
+**File permission errors:**
+- Ensure web server can write to `registered_emails.txt`
+- Check ownership: `chown www-data:www-data registered_emails.txt`
+
+## 📸 Screenshots
+
+### Application Interface
+![Application Screenshot](screenshots/app-interface.png)
+*Main subscription interface with email input and verification forms*
+
+### Email Examples
+![Verification Email](screenshots/verification-email.png)
+*Example of verification code email sent to users*
+
+![XKCD Comic Email](screenshots/comic-email.png)
+*Example of daily XKCD comic email with unsubscribe option*
+
+### CRON Job Setup
+![CRON Setup](screenshots/cron-setup.png)
+*Automated CRON job configuration via setup script*
+
+> **Note:** Add your screenshots to a `screenshots/` folder in your repository and update the image paths above.
+
+- [ ] Add database support (MySQL/PostgreSQL)
+- [ ] Implement user dashboard
+- [ ] Add preference settings (comic frequency, categories)
+- [ ] Mobile-responsive design improvements
+- [ ] Rate limiting for verification attempts
+- [ ] Email templates with better styling
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)  
+5. Open a Pull Request
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🔗 Links
+
+- **Live Demo:** [https://email-verification-fkfa.onrender.com]
+- **XKCD Official:** https://xkcd.com
+- **PHPMailer Documentation:** https://github.com/PHPMailer/PHPMailer
+
+---
+
+Made with ❤️ by [Mobeen Khan] | © 2025
