@@ -98,7 +98,7 @@ Start PHP's built-in development server:
 php -S localhost:8000
 ```
 
-Open in browser: **👉 https://email-verification-fkfa.onrender.com**
+Open in browser: **👉 https://localhost:8000**
 
 ### 6️⃣ CRON Job Setup
 
