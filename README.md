@@ -5,7 +5,7 @@ A PHP-based email verification system where users register using their email, re
 This project uses PHPMailer for reliable email delivery and stores registered emails in a simple text file (`registered_emails.txt`) - no database required!
 
 
-## **Live Demo:** [https://email-verification-fkfa.onrender.com]
+## **Live Demo:** `https://email-verification-fkfa.onrender.com`
 
 
 ## 🚀 Features
@@ -379,11 +379,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔗 Links
 
-- **Live Demo:** [https://email-verification-fkfa.onrender.com]
+- **Live Demo:** https://email-verification-fkfa.onrender.com
 - **XKCD Official:** https://xkcd.com
 - **PHPMailer Documentation:** https://github.com/PHPMailer/PHPMailer
 - **Render Documentation:** https://render.com/docs
 
 ---
 
-Made with ❤️ by [Mobeen Khan] | © 2025
+Made with ❤️ by **Mobeen Khan** | © 2025
