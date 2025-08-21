@@ -5,7 +5,7 @@ A PHP-based email verification system where users register using their email, re
 This project uses PHPMailer for reliable email delivery and stores registered emails in a simple text file (`registered_emails.txt`) - no database required!
 
 
-# **Live Demo:** [https://email-verification-fkfa.onrender.com]
+## **Live Demo:** [https://email-verification-fkfa.onrender.com]
 
 
 ## 🚀 Features
