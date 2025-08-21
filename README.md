@@ -230,14 +230,14 @@ The system uses PHPMailer with SMTP authentication. Popular providers:
 ## 📸 Screenshots
 
 ### Application Interface
-![Application Screenshot](screenshots/app-interface.png)
+![Application Screenshot](screenshots/image1.png)
 *Main subscription interface with email input and verification forms*
 
 ### Email Examples
-![Verification Email](screenshots/verification-email.png)
+![Verification Email](screenshots/email-verification.png)
 *Example of verification code email sent to users*
 
-![XKCD Comic Email](screenshots/comic-email.png)
+![XKCD Comic Email](screenshots/image2.png)
 *Example of daily XKCD comic email with unsubscribe option*
 
 ### CRON Job Setup
