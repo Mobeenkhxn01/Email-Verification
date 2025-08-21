@@ -1,0 +1,6 @@
+.git
+node_modules
+vendor
+composer.lock
+registered_emails.txt
+.env
